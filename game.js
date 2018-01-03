@@ -12,7 +12,7 @@ class Paddle{
         this.x = paddleX
         this.y = paddleY
         this.width = 100
-        this.height = 10
+        this.height = 30
     }
 }
 
@@ -26,15 +26,15 @@ class Ball{
     }
 
     checkPaddle(){
-        if(this.x >= player.x && this.x <= player.width){
-            if(this.y >= player.y && this.y <= player.height){
+        console.log(this.x, player.x, player.width)
+        if(this.x >= player.x && this.x <= player.width + player.x){
+            if(this.y >= player.y && this.y <= player.height + player.y){
                 this.changeDirection()
             }
         }
     }
 
     changeDirection(){
-        this.ballSpeedX = -this.ballSpeedX
         this.ballSpeedY = -this.ballSpeedY
     }
     checkColision(){
