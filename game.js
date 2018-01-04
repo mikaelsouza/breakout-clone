@@ -7,45 +7,65 @@ var mousePos
 
 // Classes a serem utilizadas definidas aqui
 
+function map(value, in_min, in_max, out_min, out_max){
+    return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+}
+
 class Paddle{
     constructor(paddleX, paddleY){
         this.x = paddleX
         this.y = paddleY
         this.width = 100
-        this.height = 30
+        this.height = 5
     }
 }
 
 class Ball{
-    constructor(radius){
-        this.x = canvas.width / 2
-        this.y = canvas.height / 2
-        this.radius = radius
-        this.ballSpeedX = 5
+    constructor(){
+        this.resetPosition()
+        this.radius = 5
+        this.ballSpeedX = Math.floor(Math.random() * 10) - 5
         this.ballSpeedY = 5
     }
 
+    resetPosition(){
+
+        // Reseta posição da bola
+
+        this.ballSpeedX = Math.floor(Math.random() * 10) - 5
+        this.x = canvas.width / 2
+        this.y = canvas.height / 2
+    }
+
     checkPaddle(){
-        console.log(this.x, player.x, player.width)
+
+        // Verifica se a bola encostou no paddle/
+
         if(this.x >= player.x && this.x <= player.width + player.x){
             if(this.y >= player.y && this.y <= player.height + player.y){
-                this.changeDirection()
+                this.ballSpeedY = -this.ballSpeedY
+                this.ballSpeedX = map(this.x, player.x, player.x + player.width, -5, 5)
             }
         }
     }
-
-    changeDirection(){
-        this.ballSpeedY = -this.ballSpeedY
-    }
     checkColision(){
+
+        // Verifica se a bola encostou nas paredes ou no chão.
+
         if(this.x <= 0 || this.x > canvas.width){
             this.ballSpeedX = -this.ballSpeedX
         }
-        if(this.y <= 0 || this.y > canvas.height){
+        if(this.y <= 0){
             this.ballSpeedY = -this.ballSpeedY
+        }
+        if(this.y >= canvas.height){
+            this.resetPosition()
         }
     }
     moveBall(){
+
+        // Método para movimento da bola
+
         this.checkColision()
         this.checkPaddle()
         this.x += this.ballSpeedX
@@ -65,7 +85,7 @@ window.onload = function(){
         y: 0
     }
     player = new Paddle(canvas.width / 2 - 50, canvas.height - 50)
-    ball = new Ball(10)
+    ball = new Ball()
 
 
     // Adiciona leitor de eventos para o mouse.
@@ -81,6 +101,8 @@ window.onload = function(){
 
         update()
         draw()
+
+        console.log(ball.ballSpeedX)
 
     }, 1000 / framesPerSecond)
 }
