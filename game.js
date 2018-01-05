@@ -44,7 +44,7 @@ class Ball{
         if(this.x >= player.x && this.x <= player.width + player.x){
             if(this.y >= player.y && this.y <= player.height + player.y){
                 this.ballSpeedY = -this.ballSpeedY
-                this.ballSpeedX = map(this.x, player.x, player.x + player.width, -5, 5)
+                this.ballSpeedX = map(this.x, player.x, player.x + player.width, -10, 10)
             }
         }
     }
