@@ -4,11 +4,45 @@ var framesPerSecond = 60
 var player
 var ball
 var mousePos
+var block
+var blocks
+var BLOCK_WIDTH = 50
+var BLOCK_HEIGHT = 20
 
 // Classes a serem utilizadas definidas aqui
 
 function map(value, in_min, in_max, out_min, out_max){
     return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+}
+
+class Blocks{
+    constructor(blocks){
+        this.blocks = blocks
+    }
+    checkBlocks(){
+        for(var i = this.blocks.length - 1; i >= 0; i--){
+            if(this.blocks[i].touchingBall()){
+                this.blocks.splice(i, 1)
+                ball.ballSpeedY = -ball.ballSpeedY
+            }
+        }
+    }
+}
+
+class Block{
+    constructor(blockX, blockY){
+        this.x = blockX
+        this.y = blockY
+        this.height = BLOCK_HEIGHT
+        this.width = BLOCK_WIDTH
+    }
+    touchingBall(){
+        if(ball.x >= this.x && ball.x <= this.x + this.width){
+            if(ball.y >= this.y && ball.y <= this.y + this.height){
+                return true
+            }
+        }
+    }
 }
 
 class Paddle{
@@ -43,8 +77,8 @@ class Ball{
 
         if(this.x >= player.x && this.x <= player.width + player.x){
             if(this.y >= player.y && this.y <= player.height + player.y){
-                this.ballSpeedY = -this.ballSpeedY
                 this.ballSpeedX = map(this.x, player.x, player.x + player.width, -10, 10)
+                this.ballSpeedY = -this.ballSpeedY
             }
         }
     }
@@ -60,6 +94,7 @@ class Ball{
         }
         if(this.y >= canvas.height){
             this.resetPosition()
+            resetBlocks()
         }
     }
     moveBall(){
@@ -71,6 +106,19 @@ class Ball{
         this.x += this.ballSpeedX
         this.y += this.ballSpeedY
     }
+}
+
+function resetBlocks(){
+
+    
+    block = []
+    for(var j = 3; j < 9; j++){
+        for(var i = 0; i < 14; i++){
+            var n = new Block(i * (BLOCK_WIDTH + 1) + 42, (BLOCK_HEIGHT + 1) * j)
+            block.splice(0, 0, n)
+        }
+    }
+    blocks = new Blocks(block)
 }
 
 window.onload = function(){
@@ -86,6 +134,7 @@ window.onload = function(){
     }
     player = new Paddle(canvas.width / 2 - 50, canvas.height - 50)
     ball = new Ball()
+    resetBlocks()
 
 
     // Adiciona leitor de eventos para o mouse.
@@ -102,8 +151,6 @@ window.onload = function(){
         update()
         draw()
 
-        console.log(ball.ballSpeedX)
-
     }, 1000 / framesPerSecond)
 }
 
@@ -116,6 +163,7 @@ function update(){
     // Atualiza a posicao da bola
 
     ball.moveBall()
+    blocks.checkBlocks()
 }
 
 function draw(){
@@ -136,6 +184,13 @@ function draw(){
     canvasContext.beginPath()
     canvasContext.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2, true)
     canvasContext.fill()
+
+    //Pinta bloco na tela
+    for(var i = 0; i < blocks.blocks.length; i++){
+        canvasContext.fillRect(blocks.blocks[i].x, blocks.blocks[i].y, blocks.blocks[i].width, blocks.blocks[i].height)
+    }
+
+    
 
 }
 
