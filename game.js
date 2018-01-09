@@ -6,8 +6,10 @@ var ball
 var mousePos
 var block
 var blocks
+var mouseClicked = false
 var BLOCK_WIDTH = 50
 var BLOCK_HEIGHT = 20
+var clickEvent
 
 // Classes a serem utilizadas definidas aqui
 
@@ -24,6 +26,7 @@ class Blocks{
             if(this.blocks[i].touchingBall()){
                 this.blocks.splice(i, 1)
                 ball.ballSpeedY = -ball.ballSpeedY
+                break
             }
         }
     }
@@ -50,16 +53,26 @@ class Paddle{
         this.x = paddleX
         this.y = paddleY
         this.width = 100
-        this.height = 5
+        this.height = 30
     }
 }
 
 class Ball{
     constructor(){
+        this.lines = []
         this.resetPosition()
         this.radius = 5
         this.ballSpeedX = Math.floor(Math.random() * 10) - 5
         this.ballSpeedY = 5
+
+    }
+
+    moveLines(){
+
+        for(var i = this.lines.length - 2; i >= 0; i--){
+            this.lines[i + 1] = this.lines[i]
+        }
+        this.lines[0] = {x: this.x, y: this.y}
     }
 
     resetPosition(){
@@ -69,6 +82,10 @@ class Ball{
         this.ballSpeedX = Math.floor(Math.random() * 10) - 5
         this.x = canvas.width / 2
         this.y = canvas.height / 2
+        this.lines = []
+        for(var i = 0; i < 10; i++){
+            this.lines.splice(0, 0, {x: this.x, y: this.y})
+        }
     }
 
     checkPaddle(){
@@ -86,11 +103,18 @@ class Ball{
 
         // Verifica se a bola encostou nas paredes ou no chão.
 
-        if(this.x <= 0 || this.x > canvas.width){
+        if(this.x <= 0){
             this.ballSpeedX = -this.ballSpeedX
+            this.x = 0
+            
+        }
+        if(this.x >= canvas.width){
+            this.ballSpeedX = -this.ballSpeedX
+            this.x = canvas.width
         }
         if(this.y <= 0){
             this.ballSpeedY = -this.ballSpeedY
+            this.y = 0
         }
         if(this.y >= canvas.height){
             this.resetPosition()
@@ -143,6 +167,15 @@ window.onload = function(){
         mousePos = getMousePosition(evt)
     })
 
+    canvas.addEventListener('mousedown', function(evt){
+        clickEvent = evt
+        mouseClicked = true
+    })
+
+    canvas.addEventListener('mouseup', function(evt){
+        mouseClicked = false
+    })
+
 
     // Define loop do jogo
 
@@ -163,7 +196,9 @@ function update(){
     // Atualiza a posicao da bola
 
     ball.moveBall()
+    ball.moveLines()
     blocks.checkBlocks()
+    mouseGravity()
 }
 
 function draw(){
@@ -190,8 +225,15 @@ function draw(){
         canvasContext.fillRect(blocks.blocks[i].x, blocks.blocks[i].y, blocks.blocks[i].width, blocks.blocks[i].height)
     }
 
-    
+    // Pinta linhas na tela
 
+    canvasContext.strokeStyle = 'white'
+    for(i = 0; i < ball.lines.length - 1; i++){
+        canvasContext.beginPath()
+        canvasContext.moveTo(ball.lines[i].x, ball.lines[i].y)
+        canvasContext.lineTo(ball.lines[i + 1].x, ball.lines[i + 1].y)
+        canvasContext.stroke()
+    }
 }
 
 function getMousePosition(evt){
@@ -206,5 +248,23 @@ function getMousePosition(evt){
     return {
         x: mouseX,
         y: mouseY
+    }
+}
+
+function mouseGravity(){
+    if(mouseClicked){
+        var aux = getMousePosition(clickEvent)
+        
+        if(ball.x <= aux.x){
+            ball.ballSpeedX += 0.2
+        } else {
+            ball.ballSpeedX -= 0.2
+        }
+
+        if(ball.y <= aux.y){
+            ball.ballSpeedY += 0.2
+        } else {
+            ball.ballSpeedY -= 0.2
+        }
     }
 }
